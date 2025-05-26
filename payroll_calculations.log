@@ -1,0 +1,28 @@
+2025-05-24 02:39:22,575 - __main__ - INFO - 현재 작업 디렉토리 (프로젝트 루트여야 함): C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)
+2025-05-24 02:39:22,576 - __main__ - INFO - PayrollCalculator 테스트 시작 (if __name__ == '__main__')
+2025-05-24 02:39:22,576 - __main__ - INFO - 사용할 설정 파일 절대 경로: C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\Config\settings_old(v1).yaml
+2025-05-24 02:39:22,577 - __main__ - INFO - 사용할 간이세액표 절대 경로: C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\data\근로소득_간이세액표(조견표).xlsx
+2025-05-24 02:39:22,589 - __main__ - INFO - 설정 파일 로드 성공: C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\Config\settings_old(v1).yaml
+2025-05-24 02:39:22,590 - __main__ - INFO - 간이세액표 로드 시도 (절대 경로 사용): C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\data\근로소득_간이세액표(조견표).xlsx
+2025-05-24 02:39:23,554 - __main__ - INFO - 간이세액표 로드 및 전처리 완료. 사용될 컬럼: ['salary_min_krw', 'salary_max_krw', 'tax_1_person_krw', 'tax_2_person_krw', 'tax_3_person_krw', 'tax_4_person_krw', 'tax_5_person_krw', 'tax_6_person_krw', 'tax_7_person_krw', 'tax_8_person_krw', 'tax_9_person_krw', 'tax_10_person_krw', 'tax_11_person_krw']
+2025-05-24 02:39:23,554 - __main__ - INFO - 테스트 입력값: 총급여=3,000,000, 비과세=200,000, 부양가족수=1
+2025-05-24 02:39:23,554 - __main__ - INFO - 급여 계산 시작: 총급여 3,000,000, 비과세 200,000, 과세대상 2,800,000, 부양가족 1인
+2025-05-24 02:39:23,555 - __main__ - INFO - 급여 계산 완료: 총공제액 325,790, 실수령액 2,674,210
+2025-05-24 02:39:23,555 - __main__ - ERROR - 급여 계산 테스트 중 예외 발생: name 'details' is not defined
+2025-05-24 02:39:23,555 - __main__ - INFO - PayrollCalculator 테스트 종료
+2025-05-24 02:45:33,556 - __main__ - INFO - 현재 작업 디렉토리 (프로젝트 루트여야 함): C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)
+2025-05-24 02:45:33,557 - __main__ - INFO - PayrollCalculator 테스트 시작 (if __name__ == '__main__')
+2025-05-24 02:45:33,557 - __main__ - INFO - 사용할 설정 파일 절대 경로: C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\Config\settings_old(v1).yaml
+2025-05-24 02:45:33,557 - __main__ - INFO - 사용할 간이세액표 절대 경로: C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\data\근로소득_간이세액표(조견표).xlsx
+2025-05-24 02:45:33,566 - __main__ - INFO - 설정 파일 로드 성공: C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\Config\settings_old(v1).yaml
+2025-05-24 02:45:33,567 - __main__ - INFO - 간이세액표 로드 시도 (절대 경로 사용): C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\data\근로소득_간이세액표(조견표).xlsx
+2025-05-24 02:45:34,651 - __main__ - INFO - 간이세액표 로드 및 전처리 완료. 사용될 컬럼: ['salary_min_krw', 'salary_max_krw', 'tax_1_person_krw', 'tax_2_person_krw', 'tax_3_person_krw', 'tax_4_person_krw', 'tax_5_person_krw', 'tax_6_person_krw', 'tax_7_person_krw', 'tax_8_person_krw', 'tax_9_person_krw', 'tax_10_person_krw', 'tax_11_person_krw']
+2025-05-24 02:45:34,651 - __main__ - INFO - 테스트 입력값: 총급여=3,000,000, 비과세=200,000, 부양가족수=1
+2025-05-24 02:45:34,652 - __main__ - INFO - 급여 계산 시작: 총급여 3,000,000, 비과세 200,000, 과세대상 2,800,000, 부양가족 1인
+2025-05-24 02:45:34,652 - __main__ - INFO - 급여 계산 완료: 총공제액 325,790, 실수령액 2,674,210
+2025-05-24 02:45:34,654 - __main__ - INFO - 결과 출력 완료
+2025-05-24 02:45:34,654 - __main__ - INFO - PayrollCalculator 테스트 종료
+2025-05-26 21:05:14,724 - CLIOperationLogger - INFO - [INFO] 명령어 실행: calculate, 직원 ID: TEST001, 대상 연월: 2025-07, 설정 파일: settings.yaml
+2025-05-26 21:05:14,726 - CLIOperationLogger - INFO - [INFO] 설정 파일 로딩 시도: C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\Config\settings.yaml
+2025-05-26 21:05:14,736 - CLIOperationLogger - INFO - [INFO] 설정 파일 'C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\Config\settings.yaml' 로딩 완료.
+2025-05-26 21:05:14,736 - CLIOperationLogger - INFO - 입력 파일이 제공되지 않아 예시 데이터를 생성합니다.

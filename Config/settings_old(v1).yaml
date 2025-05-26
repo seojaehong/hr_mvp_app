@@ -1,0 +1,80 @@
+# settings.yaml
+# 2025년 기준 4대보험 요율 및 기준액 (2025년 요율 동결, 건강보험 상한액 변경 반영)
+
+year: 2025
+effective_date: "2025-01-01"
+
+rates:
+  national_pension:
+    employee_rate: 0.045
+    employer_rate: 0.045 # 실제로는 사업장 규모별로 다를 수 있으나, MVP에서는 단일 값으로 시작
+    monthly_salary_min: 370000    # 2024년 기준 유지 (변동 시 업데이트 필요)
+    monthly_salary_max: 5900000    # 2024년 기준 유지 (변동 시 업데이트 필요)
+
+  health_insurance:
+    employee_rate: 0.03545 # 건강보험료율 (근로자 부담, 장기요양 제외) - 2024년과 동일
+    employer_rate: 0.03545 # 건강보험료율 (사업주 부담, 장기요양 제외) - 2024년과 동일
+    monthly_salary_max: 127056982 # 2025년 변경된 보수월액 상한액
+    monthly_salary_min: 280000     # 2024년 기준 최저임금 기반 추정 (정확한 법적 하한액 확인 필요)
+    long_term_care_rate: 0.1295 # 건강보험료에 대한 장기요양보험료율 (건강보험료의 12.95%) - 2024년과 동일
+
+  employment_insurance:
+    employee_rate: 0.009 # 고용보험료율 (근로자 부담, 실업급여) - 2024년과 동일
+    # 사업주 부담 요율은 사업장 규모(우선지원대상기업 여부, 근로자 수)에 따라 다름
+    # MVP에서는 우선 단일 값으로 처리하거나, 가장 일반적인 경우를 가정
+    employer_rate_small_business: 0.009 # 150인 미만 기업 등 (실업급여분)
+    employer_rate_large_business: null # 150인 이상 기업 등 (별도 처리 또는 null, MVP에서는 우선 null)
+    # 고용안정·직업능력개발사업 요율은 별도 (0.0025 ~ 0.0085, 사업주 부담)
+    # 산재보험료율은 업종별로 매우 다양하므로 MVP에서는 일단 제외하거나 별도 관리
+
+# 소득세 간이세액표 (2024년 귀속 기준, 2023년 개정안 반영된 엑셀 파일 참조)
+# 실제 시스템에서는 이 부분을 DB나 더 구조화된 방식으로 관리할 수 있음
+tax_brackets: # 근로소득 간이세액표 (월급여액 기준, 1인 가구, 비과세 제외한 과세표준 기준)
+  # 이 구조는 payroll_calculations_v4.py의 get_income_tax 함수와 호환되어야 함.
+  # PayrollSettings 클래스에서 이 구조를 파싱하여 사용할 예정.
+  # 예시: 월 과세급여 280만원 이상 ~ 282만원 미만, 1인 가구 -> 56,800원
+  # 아래는 단순 예시이며, 실제 간이세액표는 훨씬 복잡하고 구간이 많음.
+  # MVP에서는 analyze_tax_table_v3.py 에서 파싱한 엑셀을 직접 참조하는 방식을 유지하고,
+  # 이 tax_brackets는 향후 직접 관리 또는 API 연동 시의 예시로 남겨둠.
+  # 현재 payroll_calculator_module.py 에서는 이 tax_brackets를 직접 사용하지 않고,
+  # payroll_calculations_v4.py (또는 이를 계승한 로직)에서 엑셀을 읽도록 되어 있음.
+  # 따라서 이 부분은 현재 PayrollSettings의 _validate_settings() 검증을 통과하기 위한 최소 구조만 유지.
+  - limit: 1060000
+    rate: 0.06
+    deduction: 0
+  - limit: 1400000 # 예시: 106만원 초과 140만원 이하 (실제 간이세액표와 다름)
+    rate: 0.06 # 단순 예시
+    deduction: 0 # 단순 예시
+  - limit: 3350000 # 예시: 140만원 초과 335만원 이하
+    rate: 0.15
+    deduction: 108000 # 단순 예시
+  # ... (이하 실제 간이세액표 구간에 따라 추가)
+
+# 기타 설정 (예: 절사 단위 등)
+general_settings:
+  deduction_rounding_unit: 10 # 공제액 절사 단위 (예: 10원 단위)
+  tax_table_excel_path: "/home/ubuntu/upload/근로소득_간이세액표(조견표).xlsx" # 기존 경로 유지
+
+# 기존 설정에 추가
+email_settings:
+  server: "smtp.gmail.com"  # SMTP 서버 주소
+  port: 587                 # SMTP 포트
+  use_tls: true             # TLS 사용 여부
+  username: "your-email@gmail.com"  # SMTP 사용자 이름
+  password: "your-app-password"     # SMTP 비밀번호 (앱 비밀번호 권장)
+  default_sender: "your-company-name <your-email@gmail.com>"  # 기본 발신자
+
+# 멀티테넌시 설정 추가
+tenants:
+  tenant1:
+    company_name: "회사1"
+    company_registration_number: "123-45-67890"
+    ceo_name: "홍길동"
+    company_address: "서울시 강남구"
+    company_contact: "02-1234-5678"
+  tenant2:
+    company_name: "회사2"
+    company_registration_number: "234-56-78901"
+    ceo_name: "김철수"
+    company_address: "서울시 서초구"
+    company_contact: "02-2345-6789"

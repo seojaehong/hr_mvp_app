@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>급여명세서 - </title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', 'Nanum Gothic', sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+        .company-info {
+            font-size: 12px;
+            margin-top: 10px;
+            color: #666;
+        }
+        .employee-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .employee-info div {
+            flex: 1;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .amount {
+            text-align: right;
+            font-family: monospace;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        .note {
+            font-size: 11px;
+            color: #666;
+            font-style: italic;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .summary-box {
+            border: 2px solid #333;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .summary-box .title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .summary-box .amount {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: #000;
+        }
+        .work-summary {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .work-summary div {
+            flex: 1;
+            min-width: 120px;
+            margin: 5px;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .work-summary .label {
+            font-size: 12px;
+            color: #666;
+        }
+        .work-summary .value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>급여명세서</h1>
+            <div>2025년 07월</div>
+            <div class="company-info">
+                 | 사업자등록번호: <br>
+                대표:  | 주소:  | 연락처: 
+            </div>
+        </div>
+
+        <div class="employee-info">
+            <div>
+                <strong>직원 ID:</strong> <br>
+                <strong>이름:</strong> 미등록<br>
+                <strong>부서:</strong> 미등록
+            </div>
+            <div>
+                <strong>직급:</strong> 미등록<br>
+                <strong>입사일:</strong> 미등록<br>
+                <strong>지급일:</strong> 지급일 정보 없음
+            </div>
+        </div>
+
+        <div class="work-summary">
+            <div>
+                <div class="label">근무일수</div>
+                <div class="value"></div>
+            </div>
+            <div>
+                <div class="label">정규 근로시간</div>
+                <div class="value"></div>
+            </div>
+            <div>
+                <div class="label">연장 근로시간</div>
+                <div class="value"></div>
+            </div>
+            <div>
+                <div class="label">야간 근로시간</div>
+                <div class="value"></div>
+            </div>
+            <div>
+                <div class="label">휴일 근로시간</div>
+                <div class="value"></div>
+            </div>
+        </div>
+
+        <h2 class="section-title">지급 항목</h2>
+        <h3>과세 대상 항목</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>항목</th>
+                    <th>금액</th>
+                    <th>비고</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr class="total-row">
+                    <td>과세 대상 소득 합계</td>
+                    <td class="amount"></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>비과세 항목</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>항목</th>
+                    <th>금액</th>
+                    <th>비고</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr class="total-row">
+                    <td>비과세 항목 합계</td>
+                    <td class="amount"></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 class="section-title">공제 항목</h2>
+        <h3>사회보험</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>항목</th>
+                    <th>금액</th>
+                    <th>비고</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            </tbody>
+        </table>
+
+        <h3>세금</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>항목</th>
+                    <th>금액</th>
+                    <th>비고</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            </tbody>
+        </table>
+
+        
+
+        <div class="summary-box">
+            <div class="title">총 지급액</div>
+            <div class="amount">원</div>
+        </div>
+
+        <div class="summary-box">
+            <div class="title">총 공제액</div>
+            <div class="amount">원</div>
+        </div>
+
+        <div class="summary-box">
+            <div class="title">실 수령액</div>
+            <div class="amount">원</div>
+        </div>
+
+        <div class="footer">
+            <p>본 급여명세서는 지급일 정보 없음에 생성되었습니다.</p>
+            <p>문의사항은 인사팀(hr@example.com)으로 연락주시기 바랍니다.</p>
+        </div>
+    </div>
+</body>
+</html>

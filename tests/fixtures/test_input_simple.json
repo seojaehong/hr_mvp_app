@@ -1,0 +1,14 @@
+{
+  "employee_id": "test_simple_workday_no_overtime_no_night",
+  "period": "2025-05",
+  "hire_date": "2025-01-01",
+  "resignation_date": null,
+  "records": [
+    {
+      "date": "2025-05-01",
+      "start_time": "09:00",
+      "end_time": "18:00",
+      "break_time_minutes": 60
+    }
+  ]
+}

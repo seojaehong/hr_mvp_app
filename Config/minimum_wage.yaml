@@ -1,0 +1,13 @@
+# 최저임금 설정
+minimum_wages:
+  - year: 2023
+    hourly_rate: 9620
+    monthly_equivalent: 2010580  # 주 40시간 기준 월 환산액
+  
+  - year: 2024
+    hourly_rate: 10000
+    monthly_equivalent: 2090000
+  
+  - year: 2025
+    hourly_rate: 10340
+    monthly_equivalent: 2161060

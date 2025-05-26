@@ -1,0 +1,540 @@
+# 타임카드 테스트 케이스 정의
+# 이 파일은 정책 기반 시뮬레이션을 위한 테스트 케이스를 정의합니다.
+# 각 테스트 케이스는 입력 데이터와 기대 출력 결과를 포함합니다.
+
+test_cases:
+  # 단순 근무일 테스트 (연장/야간 근무 없음)
+  - id: test_simple_workday_no_overtime_no_night
+    description: "단순 근무일 테스트 (연장/야간 근무 없음)"
+    input:
+      employee_id: "test_simple_workday_no_overtime_no_night"
+      period: "2025-05"
+      hire_date: "2025-01-01"
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 8.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 8.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: true
+      policies:
+        working_days:
+          hire_date: "EXCLUDE_HIRE_DATE"
+          resignation_date: "EXCLUDE_RESIGNATION_DATE"
+
+  # 일일 연장 근무 테스트
+  - id: test_workday_with_daily_overtime
+    description: "일일 연장 근무 테스트"
+    input:
+      employee_id: "test_workday_with_daily_overtime"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "09:00"
+          end_time: "20:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 8.00
+      overtime_hours: 2.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 10.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: true
+      company_settings:
+        daily_work_minutes_standard: 480
+
+  # 야간 근무 테스트 (연장 근무 없음)
+  - id: test_workday_with_night_hours_no_overtime
+    description: "야간 근무 테스트 (연장 근무 없음)"
+    input:
+      employee_id: "test_workday_with_night_hours_no_overtime"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "18:00"
+          end_time: "02:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 7.00
+      overtime_hours: 0.00
+      night_hours: 4.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 7.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: true
+      company_settings:
+        night_shift_start_time: "22:00"
+        night_shift_end_time: "06:00"
+      policies:
+        work_classification:
+          overlap_policy: "PRIORITIZE_NIGHT"
+
+  # 휴일 근무 테스트 (연장 근무 없음)
+  - id: test_holiday_work_no_overtime
+    description: "휴일 근무 테스트 (연장 근무 없음)"
+    input:
+      employee_id: "test_holiday_work_no_overtime"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-04"  # 일요일
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 0.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 8.00
+      holiday_overtime_hours: 0.00
+      total_hours: 8.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: true
+      company_settings:
+        weekly_holiday_days: ["Saturday", "Sunday"]
+
+  # 휴일 연장 근무 테스트
+  - id: test_holiday_work_with_overtime
+    description: "휴일 연장 근무 테스트"
+    input:
+      employee_id: "test_holiday_work_with_overtime"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-04"  # 일요일
+          start_time: "09:00"
+          end_time: "20:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 0.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 8.00
+      holiday_overtime_hours: 2.00
+      total_hours: 10.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: true
+      company_settings:
+        weekly_holiday_days: ["Saturday", "Sunday"]
+        daily_work_minutes_standard: 480
+
+  # 복합 조건 테스트 (여러 날짜, 다양한 조건)
+  - id: test_multiple_days_mixed_conditions
+    description: "복합 조건 테스트 (여러 날짜, 다양한 조건)"
+    input:
+      employee_id: "test_multiple_days_mixed_conditions"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"  # 평일
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+        - date: "2025-05-02"  # 평일 연장
+          start_time: "09:00"
+          end_time: "20:00"
+          break_time_minutes: 60
+        - date: "2025-05-03"  # 토요일
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 16.00
+      overtime_hours: 2.00
+      night_hours: 0.00
+      holiday_hours: 8.00
+      holiday_overtime_hours: 0.00
+      total_hours: 26.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: true
+      company_settings:
+        weekly_holiday_days: ["Saturday", "Sunday"]
+
+  # 월 중간 입사 테스트
+  - id: test_mid_month_hire_standard_work
+    description: "월 중간 입사 테스트"
+    input:
+      employee_id: "test_mid_month_hire_standard_work"
+      period: "2025-05"
+      hire_date: "2025-05-15"
+      resignation_date: null
+      records:
+        - date: "2025-05-14"  # 입사일 전
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+        - date: "2025-05-15"  # 입사일
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+        - date: "2025-05-16"  # 입사일 후
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 8.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 8.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: true
+      policies:
+        working_days:
+          hire_date: "EXCLUDE_HIRE_DATE"
+          resignation_date: "EXCLUDE_RESIGNATION_DATE"
+
+  # 월 중간 퇴사 테스트
+  - id: test_mid_month_resignation_standard_work
+    description: "월 중간 퇴사 테스트"
+    input:
+      employee_id: "test_mid_month_resignation_standard_work"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: "2025-05-15"
+      records:
+        - date: "2025-05-14"  # 퇴사일 전
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+        - date: "2025-05-15"  # 퇴사일
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+        - date: "2025-05-16"  # 퇴사일 후
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 8.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 8.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: true
+      policies:
+        working_days:
+          hire_date: "EXCLUDE_HIRE_DATE"
+          resignation_date: "EXCLUDE_RESIGNATION_DATE"
+
+  # 주휴수당 경계값 테스트 (주 15시간 미만)
+  - id: test_weekly_holiday_allowance_threshold
+    description: "주휴수당 경계값 테스트 (주 15시간 미만)"
+    input:
+      employee_id: "test_weekly_holiday_allowance_threshold"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "09:00"
+          end_time: "16:00"
+          break_time_minutes: 60
+        - date: "2025-05-02"
+          start_time: "09:00"
+          end_time: "16:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 14.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 14.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: false
+      policies:
+        weekly_holiday:
+          min_hours: 15
+          allowance_hours: 8
+          include_first_week: false
+
+  # 주휴수당 경계값 테스트 (주 15시간 이상)
+  - id: test_weekly_holiday_allowance_threshold_case2
+    description: "주휴수당 경계값 테스트 (주 15시간 이상)"
+    input:
+      employee_id: "test_weekly_holiday_allowance_threshold_case2"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "09:00"
+          end_time: "17:00"
+          break_time_minutes: 60
+        - date: "2025-05-02"
+          start_time: "09:00"
+          end_time: "17:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 15.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 8.00
+      holiday_overtime_hours: 0.00
+      total_hours: 23.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: false
+      policies:
+        weekly_holiday:
+          min_hours: 15
+          allowance_hours: 8
+          include_first_week: false
+
+  # 연장 및 야간 근무 조합 테스트
+  - id: test_overtime_night_work_combination
+    description: "연장 및 야간 근무 조합 테스트"
+    input:
+      employee_id: "test_overtime_night_work_combination"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "14:00"
+          end_time: "23:59"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 8.00
+      overtime_hours: 0.00
+      night_hours: 2.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 8.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: false
+      company_settings:
+        night_shift_start_time: "22:00"
+        night_shift_end_time: "06:00"
+      policies:
+        work_classification:
+          overlap_policy: "PRIORITIZE_NIGHT"
+
+  # 지각/조퇴 계산 테스트
+  - id: test_tardiness_early_leave_calculation
+    description: "지각/조퇴 계산 테스트"
+    input:
+      employee_id: "test_tardiness_early_leave_calculation"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "09:30"
+          end_time: "18:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 7.50
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 7.50
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: false
+      policies:
+        tardiness_early_leave:
+          standard_start_time: "09:00"
+          standard_end_time: "18:00"
+          deduction_unit: 30
+          apply_deduction: true
+
+  # 지각/조퇴 계산 테스트 (케이스 2)
+  - id: test_tardiness_early_leave_calculation_case2
+    description: "지각/조퇴 계산 테스트 (케이스 2)"
+    input:
+      employee_id: "test_tardiness_early_leave_calculation_case2"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "09:00"
+          end_time: "17:30"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 7.50
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 7.50
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: false
+      policies:
+        tardiness_early_leave:
+          standard_start_time: "09:00"
+          standard_end_time: "18:00"
+          deduction_unit: 30
+          apply_deduction: true
+
+  # 지각/조퇴 계산 테스트 (케이스 3)
+  - id: test_tardiness_early_leave_calculation_case3
+    description: "지각/조퇴 계산 테스트 (케이스 3)"
+    input:
+      employee_id: "test_tardiness_early_leave_calculation_case3"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "09:30"
+          end_time: "17:30"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 7.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 7.00
+      warnings: ["Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: false
+      policies:
+        tardiness_early_leave:
+          standard_start_time: "09:00"
+          standard_end_time: "18:00"
+          deduction_unit: 30
+          apply_deduction: true
+
+  # 유효하지 않은 입력 데이터 스키마 테스트
+  - id: test_invalid_input_data_schema
+    description: "유효하지 않은 입력 데이터 스키마 테스트"
+    input:
+      employee_id: "test_invalid_input_data_schema"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records: []
+    expected_output:
+      status: "error"
+      error_code: "NO_VALID_RECORDS"
+      message: "No valid records found after filtering by employment period"
+    policy_settings:
+      calculation_mode:
+        simple_mode: false
+      policies:
+        validation:
+          policy: "STRICT"
+
+  # 유효하지 않은 시간 형식 테스트
+  - id: test_error_handling_for_invalid_time_format
+    description: "유효하지 않은 시간 형식 테스트"
+    input:
+      employee_id: "test_error_handling_for_invalid_time_format"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "INVALID"
+          end_time: "18:00"
+          break_time_minutes: 60
+    expected_output:
+      status: "success"
+      regular_hours: 0.00
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 0.00
+      warnings: ["Invalid time format: INVALID or 18:00", "Simplified weekly OT warning"]
+    policy_settings:
+      calculation_mode:
+        simple_mode: false
+      policies:
+        validation:
+          policy: "LENIENT"
+
+  # 휴게시간 부족 알림 테스트
+  - id: test_insufficient_break_time_alert
+    description: "휴게시간 부족 알림 테스트"
+    input:
+      employee_id: "test_insufficient_break_time_alert"
+      period: "2025-05"
+      hire_date: null
+      resignation_date: null
+      records:
+        - date: "2025-05-01"
+          start_time: "09:00"
+          end_time: "18:00"
+          break_time_minutes: 20
+    expected_output:
+      status: "success"
+      regular_hours: 8.67
+      overtime_hours: 0.00
+      night_hours: 0.00
+      holiday_hours: 0.00
+      holiday_overtime_hours: 0.00
+      total_hours: 8.67
+      warnings: ["Simplified weekly OT warning"]
+      compliance_alerts:
+        - alert_code: "INSUFFICIENT_BREAK_TIME"
+          message: "Break time is less than required minimum for work duration"
+          severity: "warning"
+    policy_settings:
+      calculation_mode:
+        simple_mode: false

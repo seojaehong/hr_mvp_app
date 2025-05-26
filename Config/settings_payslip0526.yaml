@@ -1,0 +1,103 @@
+# 전사적 기본 설정 (회사 정보 등)
+company_info:
+  company_name: "(주)마누스 컴퍼니"
+  business_registration_number: "123-45-67890"
+  ceo_name: "홍길동"
+  company_address: "서울특별시 마누스구 AI로 123, 4층 (마누스빌딩)"
+  company_contact: "02-1234-5678"
+  default_pay_date: "매월 25일"
+
+# 기본 출력 디렉토리 설정
+output_settings:
+  json_output_dir: "output/json"
+  payslip_pdf_dir: "output/payslips"
+  log_dir: "output/logs"
+
+# 급여명세서 관련 설정
+payslip_settings:
+  html_template_dir: "/home/ubuntu/upload/templates"
+  html_template_name: "payslip_template.html"
+  missing_calculation_message: "[계산 근거 없음]"
+
+# 연도별 정책 설정 (YYYY 형식의 키 사용)
+yearly_policies:
+  "2024": # 이전 연도 정책 예시
+    default_work_start_time: "09:00"
+    default_work_end_time: "18:00"
+    default_break_time_minutes: 60
+    minimum_wage_hourly: 9620
+    national_pension_rate_employee: 0.045
+    national_pension_rate_employer: 0.045
+    health_insurance_rate_employee: 0.03545
+    health_insurance_rate_employer: 0.03545
+    long_term_care_insurance_rate_of_health_insurance: 0.1281 # 2024년 장기요양보험료율 예시
+    employment_insurance_rate_employee: 0.009
+    employment_insurance_rate_employer_base: 0.009
+    employment_insurance_rate_employer_stabilization_additional: 0.0025 
+    industrial_accident_insurance_rate_employer: 0.01 
+    allowances:
+      meal_allowance_non_taxable_limit: 200000
+      child_care_allowance_non_taxable_limit: 100000
+    deductions:
+      union_fee_fixed: 5000
+    holiday_policy:
+      use_workalendar_defaults: True
+      country_code: "KR"
+      custom_company_holidays:
+        - "2024-05-02"
+
+  "2025":
+    default_work_start_time: "09:00"
+    default_work_end_time: "18:00"
+    default_break_time_minutes: 60
+    minimum_wage_hourly: 9860 # 2025년 최저임금 (실제값으로 업데이트 필요)
+    national_pension_rate_employee: 0.045
+    national_pension_rate_employer: 0.045
+    health_insurance_rate_employee: 0.03545
+    health_insurance_rate_employer: 0.03545
+    long_term_care_insurance_rate_of_health_insurance: 0.1295 # 2025년 장기요양보험료율 (실제값으로 업데이트 필요)
+    employment_insurance_rate_employee: 0.009
+    employment_insurance_rate_employer_base: 0.009
+    employment_insurance_rate_employer_stabilization_additional: 0.0025
+    industrial_accident_insurance_rate_employer: 0.0105 # 업종별 상이, 예시
+    income_tax_table_ref: "NationalTaxService_2025_SimpleTaxTable.csv" # 예시, 실제 파일 또는 API 연동 필요
+    allowances:
+      meal_allowance_non_taxable_limit: 200000
+      child_care_allowance_non_taxable_limit: 200000 # 2025년 변경 예시
+      transportation_allowance_non_taxable_limit: 150000 # 신규 수당 예시
+    deductions:
+      union_fee_fixed: 10000
+      company_loan_repayment: 50000 # 개인별 설정이 필요할 수 있음, 여기서는 예시
+    holiday_policy:
+      use_workalendar_defaults: True
+      country_code: "KR"
+      custom_company_holidays:
+        - "2025-05-02"
+        - "2025-10-04"
+    # 월별 세부 정책 조정 예시 (2025년 7월부터 최저임금 변경 시나리오)
+    "07": # 월만 표기하여 해당 연도의 특정 월을 의미
+      minimum_wage_hourly: 10000 # 2025년 7월부터 최저임금 10000원으로 변경 가정
+      allowances:
+        meal_allowance_non_taxable_limit: 220000 # 7월부터 식대 비과세 한도 변경 가정
+
+  "2026":
+    default_work_start_time: "08:30"
+    default_work_end_time: "17:30"
+    default_break_time_minutes: 60
+    minimum_wage_hourly: 10500 # 예시
+    national_pension_rate_employee: 0.045
+    national_pension_rate_employer: 0.045
+    # ... 기타 2026년 정책 ...
+    allowances:
+      meal_allowance_non_taxable_limit: 200000
+      child_care_allowance_non_taxable_limit: 200000
+    holiday_policy:
+      use_workalendar_defaults: True
+      country_code: "KR"
+
+# 정책 우선순위 및 참조 로직은 cli.py 내 _load_settings_for_year_month 함수에서 구현됨.
+# 1. {year}-{month} (또는 {year}.{month_str_key}) 에 해당하는 월별 정책
+# 2. {year} 에 해당하는 연도별 기본 정책
+# 3. 전년도 {year-1} 정책 (만약 해당 연도에 설정이 아예 없는 경우, 재귀적으로 탐색)
+# 4. 코드 내 최종 기본값 (설정 파일에 아무것도 없는 최악의 경우)
+

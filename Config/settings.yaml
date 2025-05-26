@@ -1,0 +1,90 @@
+# =====================================================================
+# 정책 기반 시뮬레이션을 위한 설정 파일
+# =====================================================================
+
+# 전역 설정
+# ---------------------------------------------------------------------
+environment: production  # production, development, test
+test_mode: false         # 테스트 모드 활성화 여부
+debug_trace: false       # 디버그 추적 활성화 여부
+
+# 계산 모드 설정 (정책 스위치)
+# ---------------------------------------------------------------------
+calculation_mode:
+  # 단순계산모드 활성화 여부 (true: 단순계산, false: 정책 기반 상세 계산)
+  simple_mode: true
+  
+  # 단순계산모드 옵션
+  simple_mode_options:
+    overtime_multiplier: 1.5     # 연장근로 배수
+    holiday_work_method: HOURLY  # HOURLY: 시간당 계산, DAILY: 일할계산
+    apply_night_premium: true    # 야간 근로 할증 적용 여부
+
+# 회사 설정
+# ---------------------------------------------------------------------
+company_settings:
+  daily_work_minutes_standard: 480  # 일일 표준 근무시간(분): 8시간 = 480분
+  night_shift_start_time: "22:00"   # 야간 근무 시작 시간
+  night_shift_end_time: "06:00"     # 야간 근무 종료 시간
+  weekly_holiday_days: ["Saturday", "Sunday"]  # 주간 휴일
+  rounding_policy:
+    hours_rounding: "nearest_decimal_1"
+
+# 정책 설정
+# ---------------------------------------------------------------------
+policies:
+  # 근무일 처리 정책
+  # -------------------------------------------------------------------
+  working_days:
+    # 입사일 처리 방식
+    # - INCLUDE_HIRE_DATE: 입사일 포함
+    # - EXCLUDE_HIRE_DATE: 입사일 제외
+    hire_date: EXCLUDE_HIRE_DATE
+    
+    # 퇴사일 처리 방식
+    # - INCLUDE_RESIGNATION_DATE: 퇴사일 포함
+    # - EXCLUDE_RESIGNATION_DATE: 퇴사일 제외
+    resignation_date: EXCLUDE_RESIGNATION_DATE
+  
+  # 근무시간 분류 정책
+  # -------------------------------------------------------------------
+  work_classification:
+    # 중복 근로시간 처리 정책
+    # - PRIORITIZE_NIGHT: 야간 시간 우선 (야간 시간은 정규/연장에서 제외)
+    # - SEPARATE_CALCULATION: 야간 시간 별도 계산 (정규/연장 시간과 중복 허용)
+    overlap_policy: PRIORITIZE_NIGHT
+    
+    # 휴게시간 처리 정책
+    # - PROPORTIONAL_DEDUCTION: 휴게 시간 비율에 따라 야간 시간 조정
+    # - NO_NIGHT_DEDUCTION: 야간 시간에서 휴게 시간 공제하지 않음
+    break_time_policy: NO_NIGHT_DEDUCTION
+  
+  # 주휴수당 정책
+  # -------------------------------------------------------------------
+  weekly_holiday:
+    min_hours: 15           # 주 15시간 이상 근무 시 주휴수당 발생
+    allowance_hours: 8      # 주휴수당 시간 (8시간)
+    include_first_week: false  # 입사 첫 주 주휴수당 포함 여부
+  
+  # 지각/조퇴 정책
+  # -------------------------------------------------------------------
+  tardiness_early_leave:
+    standard_start_time: "09:00"  # 표준 출근 시간
+    standard_end_time: "18:00"    # 표준 퇴근 시간
+    deduction_unit: 30            # 공제 단위(분)
+    apply_deduction: true         # 지각/조퇴 시간 공제 적용 여부
+  
+  # 경고 메시지 정책
+  # -------------------------------------------------------------------
+  warnings:
+    enabled: true              # 경고 메시지 활성화 여부
+    test_mode_override: true   # 테스트 모드에서 경고 메시지 오버라이드 여부
+  
+  # 유효성 검사 정책
+  # -------------------------------------------------------------------
+  validation:
+    # 유효성 검사 정책
+    # - STRICT: 엄격한 검사 (오류 발생 시 처리 중단)
+    # - LENIENT: 유연한 검사 (오류 발생 시 경고 후 계속 진행)
+    # - NONE: 검사 없음
+    policy: LENIENT

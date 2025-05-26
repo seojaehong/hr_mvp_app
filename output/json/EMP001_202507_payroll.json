@@ -1,0 +1,38 @@
+{
+    "employee_id": "EMP001",
+    "year_month": "2025-07",
+    "gross_pay_components": {
+        "normal_pay": 0.0,
+        "overtime_pay": 0.0,
+        "night_allowance": 0.0,
+        "holiday_pay": 0.0
+    },
+    "gross_pay": 0.0,
+    "deductions": {
+        "unpaid_leave_deduction": 0,
+        "lateness_deduction": 0.0,
+        "early_leave_deduction": 0.0,
+        "income_tax": 0.0,
+        "social_insurance": 0.0,
+        "total_other_deductions": 0.0,
+        "total_statutory_deductions": 0.0,
+        "total_all_deductions": 0.0
+    },
+    "net_pay": 0.0,
+    "work_time_summary": {
+        "employee_id": "EMP001",
+        "month": "2025-07",
+        "summary": {
+            "total_work_days": 3,
+            "total_normal_hours": 24.0,
+            "total_overtime_hours": 3.67,
+            "total_night_hours": 0.0,
+            "total_holiday_hours": 0.0,
+            "total_paid_leave_days": 0,
+            "total_unpaid_leave_days": 0,
+            "total_late_days": 0,
+            "total_early_leave_days": 0
+        },
+        "alerts": []
+    }
+}

@@ -1,0 +1,187 @@
+# 정책 시나리오 정의 파일
+# 이 파일은 다양한 정책 조합을 정의하여 시뮬레이션을 실행하는 데 사용됩니다.
+
+# 메타데이터
+metadata:
+  version: "1.0"
+  created_at: "2025-05-20"
+  description: "정책 시뮬레이션을 위한 시나리오 정의"
+
+# 기본 입력 데이터 정의
+input_data:
+  default:
+    employee_id: "test_employee"
+    period: "2025-05"
+    hire_date: null
+    resignation_date: null
+    records:
+      - date: "2025-05-01"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+      - date: "2025-05-02"
+        start_time: "09:00"
+        end_time: "20:00"
+        break_time_minutes: 60
+      - date: "2025-05-03"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+        is_holiday: true
+  
+  # 추가 입력 데이터 정의 (필요시 사용)
+  new_hire:
+    employee_id: "new_employee"
+    period: "2025-05"
+    hire_date: "2025-05-10"
+    resignation_date: null
+    records:
+      - date: "2025-05-10"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+      - date: "2025-05-11"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+      - date: "2025-05-12"
+        start_time: "09:00"
+        end_time: "20:00"
+        break_time_minutes: 60
+
+  resignation:
+    employee_id: "resign_employee"
+    period: "2025-05"
+    hire_date: null
+    resignation_date: "2025-05-15"
+    records:
+      - date: "2025-05-01"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+      - date: "2025-05-15"
+        start_time: "09:00"
+        end_time: "13:00"
+        break_time_minutes: 30
+
+# 정책 조합 정의
+policy_sets:
+  # 단순계산모드
+  simple_mode:
+    name: "단순계산모드"
+    description: "기본 근로시간만 계산하는 단순 모드"
+    policies:
+      calculation_mode.simple_mode: true
+      company_settings.daily_work_minutes_standard: 480
+  
+  # 야간우선정책
+  night_priority:
+    name: "야간우선정책"
+    description: "야간 근로시간을 우선적으로 계산하는 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.work_classification.overlap_policy: "PRIORITIZE_NIGHT"
+      company_settings.daily_work_minutes_standard: 480
+  
+  # 연장우선정책
+  overtime_priority:
+    name: "연장우선정책"
+    description: "연장 근로시간을 우선적으로 계산하는 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.work_classification.overlap_policy: "PRIORITIZE_OVERTIME"
+      company_settings.daily_work_minutes_standard: 480
+  
+  # 주휴수당 정책 변형
+  weekly_holiday_variant:
+    name: "주휴수당정책변형"
+    description: "주휴수당 계산 기준을 변경한 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.weekly_holiday.min_hours: 12  # 기본값 15에서 변경
+      policies.weekly_holiday.include_first_week: true  # 기본값 false에서 변경
+      company_settings.daily_work_minutes_standard: 480
+  
+  # 휴게시간 처리 정책 변형
+  break_time_variant:
+    name: "휴게시간정책변형"
+    description: "휴게시간 처리 방식을 변경한 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.work_classification.break_time_policy: "DEDUCT_FROM_ALL"  # 기본값 NO_NIGHT_DEDUCTION에서 변경
+      company_settings.daily_work_minutes_standard: 480
+
+# 시뮬레이션 시나리오 정의
+scenarios:
+  # 기본 시나리오
+  basic_comparison:
+    name: "기본 정책 비교"
+    description: "단순계산모드, 야간우선정책, 연장우선정책 비교"
+    input: "default"
+    policy_sets: ["simple_mode", "night_priority", "overtime_priority"]
+  
+  # 주휴수당 시나리오
+  weekly_holiday_comparison:
+    name: "주휴수당 정책 비교"
+    description: "기본 주휴수당 정책과 변형 정책 비교"
+    input: "default"
+    policy_sets: ["night_priority", "weekly_holiday_variant"]
+  
+  # 휴게시간 처리 시나리오
+  break_time_comparison:
+    name: "휴게시간 처리 정책 비교"
+    description: "기본 휴게시간 처리 정책과 변형 정책 비교"
+    input: "default"
+    policy_sets: ["night_priority", "break_time_variant"]
+  
+  # 신규 입사자 시나리오
+  new_hire_comparison:
+    name: "신규 입사자 정책 비교"
+    description: "신규 입사자에 대한 다양한 정책 적용 비교"
+    input: "new_hire"
+    policy_sets: ["simple_mode", "night_priority", "weekly_holiday_variant"]
+  
+  # 퇴사자 시나리오
+  resignation_comparison:
+    name: "퇴사자 정책 비교"
+    description: "퇴사자에 대한 다양한 정책 적용 비교"
+    input: "resignation"
+    policy_sets: ["simple_mode", "night_priority", "overtime_priority"]
+
+# 시각화 설정
+visualization:
+  default_chart_type: "bar"
+  metrics:
+    - name: "regular_hours"
+      display_name: "정규 근로시간"
+      color: "#4285F4"
+    - name: "overtime_hours"
+      display_name: "연장 근로시간"
+      color: "#EA4335"
+    - name: "night_hours"
+      display_name: "야간 근로시간"
+      color: "#FBBC05"
+    - name: "holiday_hours"
+      display_name: "휴일 근로시간"
+      color: "#34A853"
+    - name: "total_net_work_hours"
+      display_name: "총 순 근로시간"
+      color: "#673AB7"
+  
+  chart_templates:
+    - name: "hours_comparison"
+      title: "근로시간 비교"
+      type: "bar"
+      metrics: ["regular_hours", "overtime_hours", "night_hours", "holiday_hours"]
+      stacked: true
+    
+    - name: "total_hours_comparison"
+      title: "총 근로시간 비교"
+      type: "bar"
+      metrics: ["total_net_work_hours"]
+      stacked: false
+    
+    - name: "policy_impact"
+      title: "정책 영향도 분석"
+      type: "radar"
+      metrics: ["regular_hours", "overtime_hours", "night_hours", "holiday_hours"]

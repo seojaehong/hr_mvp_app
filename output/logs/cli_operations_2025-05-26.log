@@ -1,0 +1,4 @@
+2025-05-26 21:05:14,724 - CLIOperationLogger - INFO - [INFO] 명령어 실행: calculate, 직원 ID: TEST001, 대상 연월: 2025-07, 설정 파일: settings.yaml
+2025-05-26 21:05:14,726 - CLIOperationLogger - INFO - [INFO] 설정 파일 로딩 시도: C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\Config\settings.yaml
+2025-05-26 21:05:14,736 - CLIOperationLogger - INFO - [INFO] 설정 파일 'C:\Users\iceam\Downloads\HR MVP Status and Context Inheritance (4)\Config\settings.yaml' 로딩 완료.
+2025-05-26 21:05:14,736 - CLIOperationLogger - INFO - 입력 파일이 제공되지 않아 예시 데이터를 생성합니다.

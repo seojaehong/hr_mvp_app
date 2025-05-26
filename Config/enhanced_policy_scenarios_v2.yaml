@@ -1,0 +1,942 @@
+# 정책 시나리오 정의 파일 (확장 버전 v2)
+# 이 파일은 다양한 정책 조합을 정의하여 시뮬레이션을 실행하는 데 사용됩니다.
+
+# 메타데이터
+metadata:
+  version: "2.0"
+  created_at: "2025-05-20"
+  updated_at: "2025-05-20"
+  description: "정책 시뮬레이션을 위한 확장 시나리오 정의"
+  author: "HR SaaS 개발팀"
+  schema_version: "policy_scenario_schema_v2.0"
+  change_history:
+    - date: "2025-05-20"
+      author: "개발자"
+      description: "고객 피드백 반영 업데이트 (정책 충돌, 적용 조건, 상태 관리 추가)"
+      version: "2.0"
+    - date: "2025-05-15"
+      author: "개발자"
+      description: "기본 버전 생성"
+      version: "1.0"
+
+# 정책 스키마 정의
+# 정책 키와 해당 정책의 메타데이터를 정의합니다.
+policy_schema:
+  calculation_mode.simple_mode:
+    type: "boolean"
+    default: false
+    description: "단순 계산 모드 활성화 여부"
+    legal_reference: "내부 정책"
+    validation: 
+      type: "boolean"
+    impact_level: "high"
+    category: "calculation_mode"
+    status: "active"  # active, deprecated, draft
+    applicability_condition: "true"  # 모든 사업장에 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  policies.work_classification.overlap_policy:
+    type: "string"
+    default: "PRIORITIZE_NIGHT"
+    description: "야간/연장 근로시간 중복 처리 정책"
+    legal_reference: "근로기준법 제56조"
+    validation:
+      type: "enum"
+      allowed_values: ["PRIORITIZE_NIGHT", "PRIORITIZE_OVERTIME", "COUNT_BOTH"]
+    impact_level: "high"
+    category: "work_classification"
+    status: "active"
+    applicability_condition: "true"  # 모든 사업장에 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+    related_policies: ["policies.work_classification.break_time_policy"]
+  
+  policies.work_classification.break_time_policy:
+    type: "string"
+    default: "NO_NIGHT_DEDUCTION"
+    description: "휴게시간 처리 정책"
+    legal_reference: "근로기준법 제54조"
+    validation:
+      type: "enum"
+      allowed_values: ["NO_NIGHT_DEDUCTION", "DEDUCT_FROM_ALL", "PROPORTIONAL_DEDUCTION"]
+    impact_level: "medium"
+    category: "work_classification"
+    status: "active"
+    applicability_condition: "true"  # 모든 사업장에 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  policies.weekly_holiday.min_hours:
+    type: "integer"
+    default: 15
+    description: "주휴수당 지급 기준 최소 근로시간"
+    legal_reference: "근로기준법 제55조, 시행령 제30조"
+    validation:
+      type: "range"
+      min: 0
+      max: 40
+    impact_level: "high"
+    category: "weekly_holiday"
+    status: "active"
+    applicability_condition: "num_employees >= 5"  # 5인 이상 사업장에만 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+    related_policies: ["policies.weekly_holiday.include_first_week"]
+  
+  policies.weekly_holiday.include_first_week:
+    type: "boolean"
+    default: false
+    description: "입사 첫 주 주휴수당 포함 여부"
+    legal_reference: "근로기준법 제55조, 시행령 제30조"
+    validation:
+      type: "boolean"
+    impact_level: "medium"
+    category: "weekly_holiday"
+    status: "active"
+    applicability_condition: "num_employees >= 5"  # 5인 이상 사업장에만 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  company_settings.daily_work_minutes_standard:
+    type: "integer"
+    default: 480
+    description: "일일 기본 근로시간 (분)"
+    legal_reference: "근로기준법 제50조"
+    validation:
+      type: "range"
+      min: 0
+      max: 1440
+    impact_level: "high"
+    category: "company_settings"
+    status: "active"
+    applicability_condition: "true"  # 모든 사업장에 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  # 연차유급휴가 관련 정책 추가
+  policies.annual_leave.first_year_prorata:
+    type: "boolean"
+    default: true
+    description: "첫 해 근속기간에 비례한 연차 계산 여부"
+    legal_reference: "근로기준법 제60조"
+    validation:
+      type: "boolean"
+    impact_level: "medium"
+    category: "annual_leave"
+    status: "active"
+    applicability_condition: "true"  # 모든 사업장에 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  policies.annual_leave.include_maternity_leave:
+    type: "boolean"
+    default: true
+    description: "출산휴가/육아휴직 기간을 근속기간에 포함 여부"
+    legal_reference: "근로기준법 제60조, 남녀고용평등법"
+    validation:
+      type: "boolean"
+    impact_level: "medium"
+    category: "annual_leave"
+    status: "active"
+    applicability_condition: "true"  # 모든 사업장에 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  # 단시간 근로자 관련 정책 추가
+  policies.part_time.annual_leave_accrual:
+    type: "boolean"
+    default: false
+    description: "주 15시간 미만 근로자 연차 발생 여부"
+    legal_reference: "근로기준법 제18조"
+    validation:
+      type: "boolean"
+    impact_level: "medium"
+    category: "part_time"
+    status: "active"
+    applicability_condition: "weekly_hours < 15"  # 주 15시간 미만 근로자에게만 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  policies.part_time.severance_pay_eligibility:
+    type: "boolean"
+    default: false
+    description: "주 15시간 미만 근로자 퇴직금 지급 여부"
+    legal_reference: "근로자퇴직급여 보장법 제4조"
+    validation:
+      type: "boolean"
+    impact_level: "high"
+    category: "part_time"
+    status: "active"
+    applicability_condition: "weekly_hours < 15"  # 주 15시간 미만 근로자에게만 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  # 5인 미만 사업장 예외 정책 추가
+  policies.small_business.overtime_exemption:
+    type: "boolean"
+    default: true
+    description: "5인 미만 사업장 연장근로 가산수당 면제 여부"
+    legal_reference: "근로기준법 제11조, 시행령 제7조"
+    validation:
+      type: "boolean"
+    impact_level: "high"
+    category: "small_business"
+    status: "active"
+    applicability_condition: "num_employees < 5"  # 5인 미만 사업장에만 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+  
+  policies.small_business.night_work_exemption:
+    type: "boolean"
+    default: true
+    description: "5인 미만 사업장 야간근로 가산수당 면제 여부"
+    legal_reference: "근로기준법 제11조, 시행령 제7조"
+    validation:
+      type: "boolean"
+    impact_level: "high"
+    category: "small_business"
+    status: "active"
+    applicability_condition: "num_employees < 5"  # 5인 미만 사업장에만 적용
+    conflicts_with: []  # 충돌하는 정책 없음
+
+# 정책 의존성 정의
+policy_dependencies:
+  policies.work_classification.overlap_policy:
+    depends_on: []
+    affects: ["정규 근로시간", "연장 근로시간", "야간 근로시간"]
+    conflicts_with: []
+  
+  policies.work_classification.break_time_policy:
+    depends_on: []
+    affects: ["정규 근로시간", "연장 근로시간", "야간 근로시간"]
+    conflicts_with: []
+  
+  policies.weekly_holiday.min_hours:
+    depends_on: []
+    affects: ["주휴수당"]
+    conflicts_with: []
+  
+  policies.weekly_holiday.include_first_week:
+    depends_on: ["policies.weekly_holiday.min_hours"]
+    affects: ["주휴수당"]
+    conflicts_with: []
+  
+  policies.small_business.overtime_exemption:
+    depends_on: []
+    affects: ["연장 근로수당"]
+    conflicts_with: ["policies.work_classification.overlap_policy"]
+  
+  policies.small_business.night_work_exemption:
+    depends_on: []
+    affects: ["야간 근로수당"]
+    conflicts_with: ["policies.work_classification.overlap_policy"]
+  
+  policies.part_time.annual_leave_accrual:
+    depends_on: []
+    affects: ["연차유급휴가"]
+    conflicts_with: ["policies.annual_leave.first_year_prorata"]
+
+# 고용형태별 정책 세트 정의
+employment_type_policies:
+  regular:
+    name: "정규직"
+    description: "정규직 근로자에게 적용되는 정책"
+    applicable_policies:
+      - "policies.weekly_holiday.min_hours"
+      - "policies.weekly_holiday.include_first_week"
+      - "policies.annual_leave.first_year_prorata"
+      - "policies.annual_leave.include_maternity_leave"
+  
+  part_time:
+    name: "단시간 근로자"
+    description: "주 15시간 이상 단시간 근로자에게 적용되는 정책"
+    applicable_policies:
+      - "policies.weekly_holiday.min_hours"
+      - "policies.weekly_holiday.include_first_week"
+      - "policies.annual_leave.first_year_prorata"
+  
+  short_time:
+    name: "초단시간 근로자"
+    description: "주 15시간 미만 단시간 근로자에게 적용되는 정책"
+    applicable_policies:
+      - "policies.part_time.annual_leave_accrual"
+      - "policies.part_time.severance_pay_eligibility"
+  
+  freelancer:
+    name: "프리랜서"
+    description: "프리랜서에게 적용되는 정책"
+    applicable_policies: []  # 근로기준법 적용 대상 아님
+
+# 기본 입력 데이터 정의
+input_data:
+  default:
+    employee_id: "test_employee"
+    period: "2025-05"
+    hire_date: null
+    resignation_date: null
+    employment_type: "regular"  # 고용형태 추가
+    company_size: 10  # 회사 규모 추가 (직원 수)
+    weekly_hours: 40  # 주당 근로시간 추가
+    records:
+      - date: "2025-05-01"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+      - date: "2025-05-02"
+        start_time: "09:00"
+        end_time: "20:00"
+        break_time_minutes: 60
+      - date: "2025-05-03"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+        is_holiday: true
+    metadata:
+      description: "기본 테스트 데이터"
+      tags: ["standard", "weekday", "holiday"]
+  
+  # 추가 입력 데이터 정의 (필요시 사용)
+  new_hire:
+    employee_id: "new_employee"
+    period: "2025-05"
+    hire_date: "2025-05-10"
+    resignation_date: null
+    employment_type: "regular"
+    company_size: 10
+    weekly_hours: 40
+    records:
+      - date: "2025-05-10"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+      - date: "2025-05-11"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+      - date: "2025-05-12"
+        start_time: "09:00"
+        end_time: "20:00"
+        break_time_minutes: 60
+    metadata:
+      description: "신규 입사자 테스트 데이터"
+      tags: ["new_hire", "mid_month"]
+
+  resignation:
+    employee_id: "resign_employee"
+    period: "2025-05"
+    hire_date: null
+    resignation_date: "2025-05-15"
+    employment_type: "regular"
+    company_size: 10
+    weekly_hours: 40
+    records:
+      - date: "2025-05-01"
+        start_time: "09:00"
+        end_time: "18:00"
+        break_time_minutes: 60
+      - date: "2025-05-15"
+        start_time: "09:00"
+        end_time: "13:00"
+        break_time_minutes: 30
+    metadata:
+      description: "퇴사자 테스트 데이터"
+      tags: ["resignation", "mid_month"]
+
+  night_work:
+    employee_id: "night_worker"
+    period: "2025-05"
+    hire_date: null
+    resignation_date: null
+    employment_type: "regular"
+    company_size: 10
+    weekly_hours: 40
+    records:
+      - date: "2025-05-01"
+        start_time: "22:00"
+        end_time: "06:00"
+        break_time_minutes: 60
+      - date: "2025-05-02"
+        start_time: "22:00"
+        end_time: "06:00"
+        break_time_minutes: 60
+    metadata:
+      description: "야간 근로자 테스트 데이터"
+      tags: ["night_work", "overnight"]
+  
+  part_time:
+    employee_id: "part_time_worker"
+    period: "2025-05"
+    hire_date: null
+    resignation_date: null
+    employment_type: "part_time"
+    company_size: 10
+    weekly_hours: 20  # 주 20시간 근무
+    records:
+      - date: "2025-05-01"
+        start_time: "09:00"
+        end_time: "13:00"
+        break_time_minutes: 30
+      - date: "2025-05-02"
+        start_time: "09:00"
+        end_time: "13:00"
+        break_time_minutes: 30
+      - date: "2025-05-03"
+        start_time: "09:00"
+        end_time: "13:00"
+        break_time_minutes: 30
+    metadata:
+      description: "단시간 근로자 테스트 데이터"
+      tags: ["part_time"]
+  
+  short_time:
+    employee_id: "short_time_worker"
+    period: "2025-05"
+    hire_date: null
+    resignation_date: null
+    employment_type: "short_time"
+    company_size: 10
+    weekly_hours: 10  # 주 10시간 근무
+    records:
+      - date: "2025-05-01"
+        start_time: "09:00"
+        end_time: "11:00"
+        break_time_minutes: 0
+      - date: "2025-05-02"
+        start_time: "09:00"
+        end_time: "11:00"
+        break_time_minutes: 0
+      - date: "2025-05-03"
+        start_time: "09:00"
+        end_time: "11:00"
+        break_time_minutes: 0
+    metadata:
+      description: "초단시간 근로자 테스트 데이터"
+      tags: ["short_time"]
+  
+  small_business:
+    employee_id: "small_business_employee"
+    period: "2025-05"
+    hire_date: null
+    resignation_date: null
+    employment_type: "regular"
+    company_size: 4  # 4인 사업장
+    weekly_hours: 40
+    records:
+      - date: "2025-05-01"
+        start_time: "09:00"
+        end_time: "20:00"
+        break_time_minutes: 60
+      - date: "2025-05-02"
+        start_time: "22:00"
+        end_time: "06:00"
+        break_time_minutes: 60
+    metadata:
+      description: "5인 미만 사업장 테스트 데이터"
+      tags: ["small_business", "overtime", "night_work"]
+
+# 정책 조합 정의
+policy_sets:
+  # 단순계산모드
+  simple_mode:
+    name: "단순계산모드"
+    description: "기본 근로시간만 계산하는 단순 모드"
+    policies:
+      calculation_mode.simple_mode: true
+      company_settings.daily_work_minutes_standard: 480
+    metadata:
+      category: "basic"
+      compliance_level: "minimal"
+      recommended_for: ["소규모 사업장", "단순 급여 계산"]
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"  # active, deprecated, draft
+  
+  # 야간우선정책
+  night_priority:
+    name: "야간우선정책"
+    description: "야간 근로시간을 우선적으로 계산하는 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.work_classification.overlap_policy: "PRIORITIZE_NIGHT"
+      company_settings.daily_work_minutes_standard: 480
+    metadata:
+      category: "advanced"
+      compliance_level: "standard"
+      recommended_for: ["제조업", "교대근무 사업장"]
+      legal_basis: "근로기준법 제56조 야간근로 가산수당 규정"
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"
+  
+  # 연장우선정책
+  overtime_priority:
+    name: "연장우선정책"
+    description: "연장 근로시간을 우선적으로 계산하는 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.work_classification.overlap_policy: "PRIORITIZE_OVERTIME"
+      company_settings.daily_work_minutes_standard: 480
+    metadata:
+      category: "advanced"
+      compliance_level: "standard"
+      recommended_for: ["사무직", "연장근로 빈번 사업장"]
+      legal_basis: "근로기준법 제56조 연장근로 가산수당 규정"
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"
+  
+  # 주휴수당 정책 변형
+  weekly_holiday_variant:
+    name: "주휴수당정책변형"
+    description: "주휴수당 계산 기준을 변경한 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.weekly_holiday.min_hours: 12  # 기본값 15에서 변경
+      policies.weekly_holiday.include_first_week: true  # 기본값 false에서 변경
+      company_settings.daily_work_minutes_standard: 480
+    metadata:
+      category: "custom"
+      compliance_level: "enhanced"
+      recommended_for: ["유연근무제 사업장", "단시간 근로자 다수 사업장"]
+      legal_basis: "근로기준법 제55조, 시행령 제30조 주휴수당 규정"
+      created_at: "2025-05-15"
+      updated_at: "2025-05-20"
+      status: "active"
+      change_history:
+        - date: "2025-05-20"
+          description: "주휴수당 최소 시간 15→12시간으로 변경"
+          changed_by: "인사팀"
+  
+  # 휴게시간 처리 정책 변형
+  break_time_variant:
+    name: "휴게시간정책변형"
+    description: "휴게시간 처리 방식을 변경한 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.work_classification.break_time_policy: "DEDUCT_FROM_ALL"  # 기본값 NO_NIGHT_DEDUCTION에서 변경
+      company_settings.daily_work_minutes_standard: 480
+    metadata:
+      category: "custom"
+      compliance_level: "standard"
+      recommended_for: ["서비스업", "연속 근로 사업장"]
+      legal_basis: "근로기준법 제54조 휴게시간 규정"
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"
+  
+  # 5인 미만 사업장 정책
+  small_business_policy:
+    name: "5인미만사업장정책"
+    description: "5인 미만 사업장에 적용되는 예외 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.small_business.overtime_exemption: true
+      policies.small_business.night_work_exemption: true
+      company_settings.daily_work_minutes_standard: 480
+    metadata:
+      category: "special"
+      compliance_level: "minimal"
+      recommended_for: ["5인 미만 사업장"]
+      legal_basis: "근로기준법 제11조, 시행령 제7조"
+      created_at: "2025-05-20"
+      updated_at: "2025-05-20"
+      status: "active"
+  
+  # 단시간 근로자 정책
+  part_time_policy:
+    name: "단시간근로자정책"
+    description: "단시간 근로자에게 적용되는 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.weekly_holiday.min_hours: 15
+      policies.weekly_holiday.include_first_week: false
+      policies.annual_leave.first_year_prorata: true
+      company_settings.daily_work_minutes_standard: 480
+    metadata:
+      category: "special"
+      compliance_level: "standard"
+      recommended_for: ["단시간 근로자"]
+      legal_basis: "근로기준법 제18조"
+      created_at: "2025-05-20"
+      updated_at: "2025-05-20"
+      status: "active"
+  
+  # 초단시간 근로자 정책
+  short_time_policy:
+    name: "초단시간근로자정책"
+    description: "주 15시간 미만 근로자에게 적용되는 정책"
+    policies:
+      calculation_mode.simple_mode: false
+      policies.part_time.annual_leave_accrual: false
+      policies.part_time.severance_pay_eligibility: false
+      company_settings.daily_work_minutes_standard: 480
+    metadata:
+      category: "special"
+      compliance_level: "minimal"
+      recommended_for: ["초단시간 근로자"]
+      legal_basis: "근로기준법 제18조"
+      created_at: "2025-05-20"
+      updated_at: "2025-05-20"
+      status: "active"
+
+# 시뮬레이션 시나리오 정의
+scenarios:
+  # 기본 시나리오
+  basic_comparison:
+    name: "기본 정책 비교"
+    description: "단순계산모드, 야간우선정책, 연장우선정책 비교"
+    input: "default"
+    policy_sets: ["simple_mode", "night_priority", "overtime_priority"]
+    metadata:
+      category: "comparison"
+      priority: "high"
+      tags: ["기본비교", "정책효과분석"]
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"
+    analysis_focus:
+      - metric: "regular_hours"
+        importance: "high"
+      - metric: "overtime_hours"
+        importance: "high"
+      - metric: "night_hours"
+        importance: "high"
+  
+  # 주휴수당 시나리오
+  weekly_holiday_comparison:
+    name: "주휴수당 정책 비교"
+    description: "기본 주휴수당 정책과 변형 정책 비교"
+    input: "default"
+    policy_sets: ["night_priority", "weekly_holiday_variant"]
+    metadata:
+      category: "comparison"
+      priority: "medium"
+      tags: ["주휴수당", "정책효과분석"]
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"
+    analysis_focus:
+      - metric: "holiday_hours"
+        importance: "high"
+      - metric: "total_net_work_hours"
+        importance: "medium"
+  
+  # 휴게시간 처리 시나리오
+  break_time_comparison:
+    name: "휴게시간 처리 정책 비교"
+    description: "기본 휴게시간 처리 정책과 변형 정책 비교"
+    input: "default"
+    policy_sets: ["night_priority", "break_time_variant"]
+    metadata:
+      category: "comparison"
+      priority: "medium"
+      tags: ["휴게시간", "정책효과분석"]
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"
+    analysis_focus:
+      - metric: "regular_hours"
+        importance: "medium"
+      - metric: "night_hours"
+        importance: "high"
+  
+  # 신규 입사자 시나리오
+  new_hire_comparison:
+    name: "신규 입사자 정책 비교"
+    description: "신규 입사자에 대한 다양한 정책 적용 비교"
+    input: "new_hire"
+    policy_sets: ["simple_mode", "night_priority", "weekly_holiday_variant"]
+    metadata:
+      category: "edge_case"
+      priority: "medium"
+      tags: ["신규입사", "주휴수당", "정책효과분석"]
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"
+    analysis_focus:
+      - metric: "holiday_hours"
+        importance: "high"
+      - metric: "total_net_work_hours"
+        importance: "medium"
+  
+  # 퇴사자 시나리오
+  resignation_comparison:
+    name: "퇴사자 정책 비교"
+    description: "퇴사자에 대한 다양한 정책 적용 비교"
+    input: "resignation"
+    policy_sets: ["simple_mode", "night_priority", "overtime_priority"]
+    metadata:
+      category: "edge_case"
+      priority: "medium"
+      tags: ["퇴사", "정책효과분석"]
+      created_at: "2025-05-15"
+      updated_at: "2025-05-15"
+      status: "active"
+    analysis_focus:
+      - metric: "total_net_work_hours"
+        importance: "high"
+  
+  # 야간 근로자 시나리오
+  night_work_comparison:
+    name: "야간 근로자 정책 비교"
+    description: "야간 근로자에 대한 다양한 정책 적용 비교"
+    input: "night_work"
+    policy_sets: ["night_priority", "overtime_priority", "break_time_variant"]
+    metadata:
+      category: "special_case"
+      priority: "high"
+      tags: ["야간근로", "정책효과분석"]
+      created_at: "2025-05-20"
+      updated_at: "2025-05-20"
+      status: "active"
+    analysis_focus:
+      - metric: "night_hours"
+        importance: "high"
+      - metric: "overtime_hours"
+        importance: "high"
+      - metric: "total_net_work_hours"
+        importance: "medium"
+  
+  # 5인 미만 사업장 시나리오
+  small_business_comparison:
+    name: "5인 미만 사업장 정책 비교"
+    description: "5인 미만 사업장에 대한 정책 적용 비교"
+    input: "small_business"
+    policy_sets: ["night_priority", "small_business_policy"]
+    metadata:
+      category: "special_case"
+      priority: "high"
+      tags: ["5인미만", "정책효과분석"]
+      created_at: "2025-05-20"
+      updated_at: "2025-05-20"
+      status: "active"
+    analysis_focus:
+      - metric: "overtime_hours"
+        importance: "high"
+      - metric: "night_hours"
+        importance: "high"
+      - metric: "total_net_work_hours"
+        importance: "medium"
+  
+  # 단시간 근로자 시나리오
+  part_time_comparison:
+    name: "단시간 근로자 정책 비교"
+    description: "단시간 근로자에 대한 정책 적용 비교"
+    input: "part_time"
+    policy_sets: ["night_priority", "part_time_policy"]
+    metadata:
+      category: "special_case"
+      priority: "medium"
+      tags: ["단시간", "정책효과분석"]
+      created_at: "2025-05-20"
+      updated_at: "2025-05-20"
+      status: "active"
+    analysis_focus:
+      - metric: "holiday_hours"
+        importance: "high"
+      - metric: "total_net_work_hours"
+        importance: "medium"
+  
+  # 초단시간 근로자 시나리오
+  short_time_comparison:
+    name: "초단시간 근로자 정책 비교"
+    description: "주 15시간 미만 근로자에 대한 정책 적용 비교"
+    input: "short_time"
+    policy_sets: ["night_priority", "short_time_policy"]
+    metadata:
+      category: "special_case"
+      priority: "medium"
+      tags: ["초단시간", "정책효과분석"]
+      created_at: "2025-05-20"
+      updated_at: "2025-05-20"
+      status: "active"
+    analysis_focus:
+      - metric: "total_net_work_hours"
+        importance: "high"
+
+# 시각화 설정
+visualization:
+  default_chart_type: "bar"
+  metrics:
+    - name: "regular_hours"
+      display_name: "정규 근로시간"
+      color: "#4285F4"
+      description: "기본 근로시간"
+      unit: "시간"
+      category: "work_hours"
+      order: 1
+    
+    - name: "overtime_hours"
+      display_name: "연장 근로시간"
+      color: "#EA4335"
+      description: "법정 근로시간을 초과한 근로시간"
+      unit: "시간"
+      category: "work_hours"
+      order: 2
+    
+    - name: "night_hours"
+      display_name: "야간 근로시간"
+      color: "#FBBC05"
+      description: "22시부터 06시까지의 근로시간"
+      unit: "시간"
+      category: "work_hours"
+      order: 3
+    
+    - name: "holiday_hours"
+      display_name: "휴일 근로시간"
+      color: "#34A853"
+      description: "휴일에 근무한 시간"
+      unit: "시간"
+      category: "work_hours"
+      order: 4
+    
+    - name: "holiday_overtime_hours"
+      display_name: "휴일 연장 근로시간"
+      color: "#673AB7"
+      description: "휴일에 8시간을 초과하여 근무한 시간"
+      unit: "시간"
+      category: "work_hours"
+      order: 5
+    
+    - name: "total_net_work_hours"
+      display_name: "총 순 근로시간"
+      color: "#FF6D01"
+      description: "휴게시간을 제외한 총 근로시간"
+      unit: "시간"
+      category: "summary"
+      order: 6
+    
+    - name: "compliance_alert_count"
+      display_name: "컴플라이언스 알림 수"
+      color: "#F50057"
+      description: "법규 준수 관련 알림 수"
+      unit: "개"
+      category: "compliance"
+      order: 7
+    
+    - name: "annual_leave_days"
+      display_name: "연차유급휴가 일수"
+      color: "#00BCD4"
+      description: "발생한 연차유급휴가 일수"
+      unit: "일"
+      category: "leave"
+      order: 8
+    
+    - name: "severance_pay_eligibility"
+      display_name: "퇴직금 지급 대상 여부"
+      color: "#9C27B0"
+      description: "퇴직금 지급 대상 여부 (1: 대상, 0: 비대상)"
+      unit: "여부"
+      category: "compensation"
+      order: 9
+  
+  chart_templates:
+    - name: "hours_comparison"
+      title: "근로시간 비교"
+      type: "bar"
+      metrics: ["regular_hours", "overtime_hours", "night_hours", "holiday_hours"]
+      stacked: true
+      description: "정책별 근로시간 유형 비교"
+      recommended_for: ["basic_comparison", "night_work_comparison"]
+    
+    - name: "total_hours_comparison"
+      title: "총 근로시간 비교"
+      type: "bar"
+      metrics: ["total_net_work_hours"]
+      stacked: false
+      description: "정책별 총 근로시간 비교"
+      recommended_for: ["all"]
+    
+    - name: "policy_impact"
+      title: "정책 영향도 분석"
+      type: "radar"
+      metrics: ["regular_hours", "overtime_hours", "night_hours", "holiday_hours"]
+      description: "정책이 각 근로시간 유형에 미치는 영향 분석"
+      recommended_for: ["basic_comparison", "night_work_comparison"]
+    
+    - name: "compliance_impact"
+      title: "컴플라이언스 영향 분석"
+      type: "bar"
+      metrics: ["compliance_alert_count"]
+      stacked: false
+      description: "정책별 컴플라이언스 알림 수 비교"
+      recommended_for: ["all"]
+    
+    - name: "weekly_holiday_impact"
+      title: "주휴수당 정책 영향 분석"
+      type: "bar"
+      metrics: ["holiday_hours", "total_net_work_hours"]
+      stacked: false
+      description: "주휴수당 정책이 휴일 근로시간과 총 근로시간에 미치는 영향 분석"
+      recommended_for: ["weekly_holiday_comparison", "new_hire_comparison"]
+    
+    - name: "employment_type_comparison"
+      title: "고용형태별 비교"
+      type: "bar"
+      metrics: ["regular_hours", "overtime_hours", "night_hours", "holiday_hours", "annual_leave_days", "severance_pay_eligibility"]
+      stacked: false
+      description: "고용형태별 근로시간 및 복리후생 비교"
+      recommended_for: ["part_time_comparison", "short_time_comparison"]
+    
+    - name: "small_business_exemption"
+      title: "5인 미만 사업장 예외 영향"
+      type: "bar"
+      metrics: ["overtime_hours", "night_hours"]
+      stacked: false
+      description: "5인 미만 사업장 예외 규정의 영향 분석"
+      recommended_for: ["small_business_comparison"]
+
+# 결과 비교 설정
+comparison_settings:
+  significant_difference_threshold:
+    percentage: 5.0  # 5% 이상 차이나면 중요한 차이로 간주
+    absolute:
+      regular_hours: 0.5  # 0.5시간 이상 차이나면 중요한 차이로 간주
+      overtime_hours: 0.5
+      night_hours: 0.5
+      holiday_hours: 0.5
+      total_net_work_hours: 1.0
+      annual_leave_days: 0.5
+  
+  highlight_fields:
+    - name: "compliance_alerts"
+      priority: "high"
+      description: "법규 준수 관련 알림"
+    
+    - name: "warnings"
+      priority: "medium"
+      description: "경고 메시지"
+    
+    - name: "overtime_hours"
+      priority: "high"
+      description: "연장 근로시간"
+    
+    - name: "night_hours"
+      priority: "high"
+      description: "야간 근로시간"
+    
+    - name: "annual_leave_days"
+      priority: "high"
+      description: "연차유급휴가 일수"
+    
+    - name: "severance_pay_eligibility"
+      priority: "high"
+      description: "퇴직금 지급 대상 여부"
+  
+  trace_analysis:
+    enabled: true
+    focus_on_policy_keys:
+      - "policies.work_classification.overlap_policy"
+      - "policies.weekly_holiday.min_hours"
+      - "policies.work_classification.break_time_policy"
+      - "policies.small_business.overtime_exemption"
+      - "policies.small_business.night_work_exemption"
+      - "policies.part_time.annual_leave_accrual"
+      - "policies.part_time.severance_pay_eligibility"
+
+# 정책 스냅샷 비교 설정
+policy_snapshot:
+  display_format: "table"  # table, diff, summary
+  highlight_changes: true
+  include_metadata: true
+  summary_fields:
+    - "name"
+    - "description"
+    - "status"
+    - "legal_basis"
+    - "applicability_condition"
+  
+  diff_highlight_colors:
+    added: "#E6F4EA"
+    removed: "#FCE8E6"
+    changed: "#FFF8E1"
